@@ -125,7 +125,7 @@ public class PasswordFragment extends Fragment implements Toolbar.OnMenuItemClic
         final EditText usernameView = (EditText) contentView.findViewById(R.id.username);
         final EditText passwordView = (EditText) contentView.findViewById(R.id.password);
         passwordView.setImeActionLabel("Create", EditorInfo.IME_NULL);
-        final Dialog dialog = new AlertDialog.Builder(getActivity())
+        final Dialog dialog = new AlertDialog.Builder(getActivity(), R.style.DialogTheme)
                 .setTitle(R.string.add_password_title)
                 .setView(contentView)
                 .setNegativeButton(android.R.string.cancel, null)

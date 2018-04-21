@@ -20,6 +20,12 @@
         <item name="android:fontFamily">sans-serif-light</item>
     </style>
 
+    <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+    </style>
+
     <style name="DialogEditText"  parent="android:Widget.EditText">
         <item name="colorControlNormal">@color/white</item>
         <item name="colorAccent">@color/white</item>
