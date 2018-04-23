@@ -6,6 +6,6 @@ package edu.rosehulman.passwordkeeper;
  * Covered by MIT license.
  */
 public class Constants {
-    public static final String TAG = "FPK";
+    public static final String TAG = "PK";
     public static final String FIREBASE_PATH = "FIREBASE_PATH";
 }
