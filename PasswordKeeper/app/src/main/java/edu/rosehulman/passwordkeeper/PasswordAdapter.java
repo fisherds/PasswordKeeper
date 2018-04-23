@@ -73,11 +73,11 @@ public class PasswordAdapter extends RecyclerView.Adapter<PasswordAdapter.Passwo
     }
 
     public void firebaseUpdate(Password pw) {
-        mPasswordRef.child(pw.getKey()).setValue(pw);
+        mPasswordRef.child(pw.key).setValue(pw);
     }
 
     public void firebaseRemove(Password password) {
-        mPasswordRef.child(password.getKey()).removeValue();
+        mPasswordRef.child(password.key).removeValue();
     }
 
     public void insert(Password password, int position) {
@@ -94,7 +94,7 @@ public class PasswordAdapter extends RecyclerView.Adapter<PasswordAdapter.Passwo
     private Password remove(String key) {
         for (int i = 0; i < mPasswords.size(); i++) {
             Password pw = mPasswords.get(i);
-            if (key.equals(pw.getKey())) {
+            if (key.equals(pw.key)) {
                 mPasswords.remove(i);
                 notifyItemRemoved(i);
                 return pw;
@@ -113,11 +113,10 @@ public class PasswordAdapter extends RecyclerView.Adapter<PasswordAdapter.Passwo
 
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String previousChild) {
-        
         String key = dataSnapshot.getKey();
         if (key.equals("users")) return;
         Password pw = dataSnapshot.getValue(Password.class);
-        pw.setKey(key);
+        pw.key = key;
         mPasswords.add(0, pw);
         notifyDataSetChanged();
         //notifyItemInserted(0); // seems to cause problem when first loading after app is paused.
@@ -131,10 +130,10 @@ public class PasswordAdapter extends RecyclerView.Adapter<PasswordAdapter.Passwo
         int i;
         for (i = 0; i < mPasswords.size(); i++) {
             Password pw = mPasswords.get(i);
-            if (dataSnapshot.getKey().equals(pw.getKey())) {
-                pw.setService(service);
-                pw.setUsername(username);
-                pw.setPassword(password);
+            if (dataSnapshot.getKey().equals(pw.key)) {
+                pw.service = service;
+                pw.username = username;
+                pw.password = password;
                 notifyItemChanged(i);
                 break;
             }
@@ -196,9 +195,9 @@ public class PasswordAdapter extends RecyclerView.Adapter<PasswordAdapter.Passwo
                     final EditText usernameView = (EditText) contentView.findViewById(R.id.username);
                     final EditText passwordView = (EditText) contentView.findViewById(R.id.password);
                     passwordView.setImeActionLabel("Save", EditorInfo.IME_NULL);
-                    serviceView.setText(password.getService());
-                    usernameView.setText(password.getUsername());
-                    passwordView.setText(password.getPassword());
+                    serviceView.setText(password.service);
+                    usernameView.setText(password.username);
+                    passwordView.setText(password.password);
 
                     final Dialog dialog = new AlertDialog.Builder(mInflater.getContext())
                             .setTitle(R.string.edit_password_title)
@@ -207,10 +206,10 @@ public class PasswordAdapter extends RecyclerView.Adapter<PasswordAdapter.Passwo
                             .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    password.setService(serviceView.getText().toString());
-                                    password.setPassword(passwordView.getText().toString());
+                                    password.service = serviceView.getText().toString();
+                                    password.password = passwordView.getText().toString();
                                     String username = usernameView.getText().toString();
-                                    password.setUsername(username.isEmpty() ? null : username);
+                                    password.username = username.isEmpty() ? null : username;
                                     firebaseUpdate(password);
                                 }
                             })
@@ -221,10 +220,10 @@ public class PasswordAdapter extends RecyclerView.Adapter<PasswordAdapter.Passwo
                         @Override
                         public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                             if (id == EditorInfo.IME_NULL) {
-                                password.setService(serviceView.getText().toString());
-                                password.setPassword(passwordView.getText().toString());
+                                password.service = serviceView.getText().toString();
+                                password.password = passwordView.getText().toString();
                                 String username = usernameView.getText().toString();
-                                password.setUsername(username.isEmpty() ? null : username);
+                                password.username = username.isEmpty() ? null : username;
                                 firebaseUpdate(password);
                                 dialog.dismiss();
                                 return true;
@@ -238,16 +237,16 @@ public class PasswordAdapter extends RecyclerView.Adapter<PasswordAdapter.Passwo
         }
 
         public void bindToView(final Password password) {
-            mServiceView.setText(password.getService());
-            if (password.getUsername() != null) {
-                mUsernameView.setText(password.getUsername());
+            mServiceView.setText(password.service);
+            if (password.username != null) {
+                mUsernameView.setText(password.username);
                 mUsernameView.setVisibility(View.VISIBLE);
                 mUsernameCaptionView.setVisibility(View.VISIBLE);
             } else {
                 mUsernameView.setVisibility(View.GONE);
                 mUsernameCaptionView.setVisibility(View.GONE);
             }
-            mPasswordView.setText(password.getPassword());
+            mPasswordView.setText(password.password);
         }
 
         public void toggle() {

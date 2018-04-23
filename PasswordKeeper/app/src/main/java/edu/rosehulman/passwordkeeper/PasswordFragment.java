@@ -137,7 +137,7 @@ public class PasswordFragment extends Fragment implements Toolbar.OnMenuItemClic
                                 passwordView.getText().toString(),
                                 serviceView.getText().toString());
                         String username = usernameView.getText().toString();
-                        pw.setUsername(username.isEmpty() ? null : username);
+                        pw.username = username.isEmpty() ? null : username;
                         mAdapter.firebasePush(pw);
                     }
                 })
@@ -152,7 +152,7 @@ public class PasswordFragment extends Fragment implements Toolbar.OnMenuItemClic
                             passwordView.getText().toString(),
                             serviceView.getText().toString());
                     String username = usernameView.getText().toString();
-                    pw.setUsername(username.isEmpty() ? null : username);
+                    pw.username = username.isEmpty() ? null : username;
                     mAdapter.firebasePush(pw);
                     dialog.dismiss();
                     return true;
