@@ -1,22 +1,37 @@
 package edu.rosehulman.passwordkeeper;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
-public class MainActivity extends AppCompatActivity implements LoginFragment.OnLoginListener, PasswordFragment.OnLogoutListener {
+public class MainActivity extends AppCompatActivity implements LoginFragment.OnLoginListener,
+    PasswordFragment.OnLogoutListener, GoogleApiClient.OnConnectionFailedListener {
 
+  private static final int RC_GOOGLE_LOGIN = 42;
   private FirebaseAuth mAuth;
   private FirebaseAuth.AuthStateListener mAuthStateListener;
   private OnCompleteListener mOnCompleteListener;
+  
+  private GoogleApiClient mGoogleApiClient;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +41,19 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
 
     mAuth = FirebaseAuth.getInstance();
     initializeListeners();
+    setupGoogleSignin();
+  }
+
+  private void setupGoogleSignin() {
+    GoogleSignInOptions gOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken(getString(R.string.default_web_client_id))
+        .requestEmail()
+        .build();
+    
+    mGoogleApiClient = new GoogleApiClient.Builder(this)
+        .enableAutoManage(this, this)
+        .addApi(Auth.GOOGLE_SIGN_IN_API, gOptions)
+        .build();
   }
 
   private void initializeListeners() {
@@ -75,7 +103,8 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
 
   @Override
   public void onGoogleLogin() {
-    //TODO: Log user in with Google account
+    Intent intent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+    startActivityForResult(intent, RC_GOOGLE_LOGIN);
   }
 
   @Override
@@ -111,4 +140,31 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.OnL
     loginFragment.onLoginError(message);
   }
 
+  @Override
+  public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    Log.e(Constants.TAG, "Google sign in failed!");
+    AlertDialog alert = new AlertDialog.Builder(this).setTitle("Error!").create();
+    alert.show();
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == RC_GOOGLE_LOGIN && resultCode == Activity.RESULT_OK) {
+      GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+      if (result.isSuccess()) {
+        GoogleSignInAccount account = result.getSignInAccount();
+
+        Log.d(Constants.TAG, "You are now signed in with Google " + account.getEmail());
+        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+        mAuth.signInWithCredential(credential).addOnCompleteListener(mOnCompleteListener);
+      } else {
+        showLoginError("Google authentication failed");
+      }
+
+    }
+
+
+    super.onActivityResult(requestCode, resultCode, data);
+
+  }
 }
